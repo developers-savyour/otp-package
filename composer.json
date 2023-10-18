@@ -1,0 +1,43 @@
+{
+    "name": "savyour/sms-and-email-package",
+    "description": "to send sms and email",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Muhammad Adnan",
+            "email": "muhammad.adnan@savyour.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "orchestra/testbench": "^6.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Savyour\\SmsAndEmailPackage\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Savyour\\SmsAndEmailPackage\\SmsAndEmailPackageServiceProvider"
+            ]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Savyour\\SmsAndEmailPackage\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
