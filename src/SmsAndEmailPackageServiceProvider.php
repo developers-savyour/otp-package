@@ -3,7 +3,8 @@
 namespace Savyour\SmsAndEmailPackage;
 
 use Illuminate\Support\ServiceProvider;
-use Savyour\SmsAndEmailPackage\Commands\{CreateSmsWrapper};
+use Savyour\SmsAndEmailPackage\Commands\CreateSmsWrapper;
+use Savyour\SmsAndEmailPackage\Commands\PublishConfig;
 
 class SmsAndEmailPackageServiceProvider extends ServiceProvider
 {
@@ -49,11 +50,10 @@ class SmsAndEmailPackageServiceProvider extends ServiceProvider
 
         $configFileName = self::configFileName;
         $path = self::configFilePath;
-
         $this->mergeConfigFrom($path, $configFileName);
 
         if (function_exists('config_path')) {
-            $this->publishes([$path => config_path($configFileName.'.php')]);
+            $this->publishes([$path => config_path($configFileName.'.php'),'config']);
         }
     }
 
@@ -67,6 +67,7 @@ class SmsAndEmailPackageServiceProvider extends ServiceProvider
         // register commands
         $this->commands([
            CreateSmsWrapper::class,
+           PublishConfig::class,
         ]);
 
     }
