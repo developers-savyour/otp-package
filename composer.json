@@ -10,7 +10,10 @@
             "role": "Developer"
         }
     ],
-    "require": {},
+    "require": {
+        "guzzlehttp/guzzle": "^7.8",
+        "twilio/sdk": "^7.13"
+    },
     "require-dev": {
         "orchestra/testbench": "^6.0",
         "phpunit/phpunit": "^9.0"
