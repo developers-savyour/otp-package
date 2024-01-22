@@ -4,6 +4,7 @@ namespace Savyour\SmsAndEmailPackage;
 
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class OtpService
 {
@@ -12,6 +13,7 @@ class OtpService
     protected $validity;
     protected $maxAttempts;
     protected $optMessage;
+    protected $sendingSmsServiceName;
     private $currentDate;
     private $token;
     private $OTPData;
@@ -19,6 +21,8 @@ class OtpService
     private $OTPModel;
     private $serviceResponse;
     private $serviceBasePath;
+    private $serviceBaseDir;
+    private $debugMode;
     private static $SMS_SERVICE_ERROR_TYPES =[];
     private static $OTP_SERVICE_ERROR = [];
     public static $SMS_SERVICE_ERROR_TYPES_BK =[
@@ -34,29 +38,47 @@ class OtpService
 
     public function __construct()
     {
-
+        $this->debugMode = config('config-sms-and-email-package-service.otp.otp_debug_mode');
         $this->length = config('config-sms-and-email-package-service.otp.length');
         $this->onlyDigits = config('config-sms-and-email-package-service.otp.only_digits');
         $this->validity = config('config-sms-and-email-package-service.otp.validity');
         $this->maxAttempts = config('config-sms-and-email-package-service.otp.max_attempts');
-        $this->optMessage = config('config-sms-and-email-package-service.otp.opt_message');
+        $this->optMessage = config('config-sms-and-email-package-service.otp.otp_message');
         $this->currentDate = date('Y-m-d');
         $this->OTPModel =  config('config-sms-and-email-package-service.OTPModelClass');
-        $this->serviceBasePath = 'App/'.config('config-sms-and-email-package-service.wrapper_creation_path').'/Sms';
+//        $this->serviceBasePath = 'App/'.config('config-sms-and-email-package-service.wrapper_creation_path').'/Sms';
+        $this->serviceBasePath = 'Savyour\SmsAndEmailPackage\ServicesWrappers';
         self::$SMS_SERVICE_ERROR_TYPES = config('config-sms-and-email-package-service.errors.service_wrapper_errors');
         self::$OTP_SERVICE_ERROR = config('config-sms-and-email-package-service.errors.opt_service_errors');
+        $this->sendingSmsServiceName = self::$SMS_SERVICE_ERROR_TYPES['NO_SERVICE_CALLED'];
+        $this->serviceBaseDir = __DIR__;
 
     }
 
 
     public function setSmsServices(array $smsServices)
     {
+        if($this->debugMode)
+        {
+            Log::debug('setSmsServices available services ',$smsServices);
+        }
+
         $this->availableSmsServices = $smsServices;
         return $this;
     }
 
-    public function sendOtp(string $user_id, string $mobile_number,bool $isRetry = false)
+    public function sendOtp(string $user_id, string $mobile_number,$isRetry = false)
     {
+
+        if($this->debugMode)
+        {
+            Log::debug('sendOtp fn call ',[
+                'user_id' => $user_id,
+                'mobile_number' => $mobile_number,
+                'isRetry' => $isRetry
+            ]);
+        }
+
         // checkin there is any service injected for send otp
         if(count($this->availableSmsServices) <= 0)
         {
@@ -108,7 +130,7 @@ class OtpService
                 'validation_attempts' => 0,
                 'is_verified'=> 0,
                 'is_expired'=> 0,
-                'generated_date' => date('Y-m-d H:i:s'),
+                'generated_at' => date('Y-m-d H:i:s'),
             ]);
 
         }
@@ -138,11 +160,12 @@ class OtpService
 
     public function verifyOTP($user_id, $mobile_number, $token)
     {
+
         $this->OTPData = $this->OTPModel::where('user_id', $user_id)
             ->where('mobile_number',$mobile_number)
-            ->whereBetween('generated_date',[$this->currentDate.' 00:00:00',$this->currentDate.' 23:59:59'])
+            ->whereBetween('generated_at',[$this->currentDate.' 00:00:00',$this->currentDate.' 23:59:59'])
             ->where('is_verified',0)
-            ->orderBy('generated_date','DESC')
+            ->orderBy('generated_at','DESC')
             ->first();
 
         // if record not found
@@ -198,7 +221,7 @@ class OtpService
         return [
             'status' => false,
             'message' => self::$OTP_SERVICE_ERROR['wrong_otp'],
-            'data'=> ['is_limit_reached' => false,'test ']
+            'data'=> ['is_limit_reached' => false]
 
         ];
     }
@@ -210,7 +233,8 @@ class OtpService
             'message'=>self::$OTP_SERVICE_ERROR['all_service_failure'],
             'data'=> [
                 'is_limit_reached'=>false,
-                "service_response"=>$this->serviceResponse
+                "service_response"=>$this->serviceResponse,
+                'service_name' => $this->sendingSmsServiceName,
             ]
         ];
 
@@ -244,14 +268,22 @@ class OtpService
 
         foreach($this->availableSmsServices as $smsService)
         {
-            $smsServicePath = $this->serviceBasePath.'/'.$smsService;
-            $smsServicePath = str_replace('/','\\',$smsServicePath);
-
+            $smsServicePath = $this->serviceBasePath.'\\'.$smsService;
+            $smsServicePath2 = $smsService.'.php';
+            // checking file exist
+            $fileExists = file_exists($this->serviceBaseDir.'/ServicesWrappers/'.$smsServicePath2);
+            // skip if file dose not exist
+            if(!$fileExists)
+            {
+                continue;
+            }
             $smsServiceClass = new  $smsServicePath();
             $response = $smsServiceClass->send($this->OTPData->mobile_number,$this->message);
             // if message send then break
             if($response['status'])
             {
+                // setting sending sms service class name to response
+                $this->sendingSmsServiceName = str_replace("Service","",$smsService);
                 break;
             }
         }
