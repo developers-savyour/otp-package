@@ -55,7 +55,7 @@ class TwilioService
                 $message->status = 'queued';
             }
 
-            $status = ($message->status == 'queued' || $message->status == 'true')? true : false;
+            $status = ($message->status == 'queued' || $message->status == 'true' || $message->status == 'accepted' || $message->status == 'completed') ? true : false;
 
             $response = [
                 'status' => $status,
