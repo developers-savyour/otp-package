@@ -43,9 +43,10 @@ class CequensWhatsappService
             $namespace = $this->settings['namespace'];
             $token = $this->settingsModelClass::get('cequens_whatsapp_token');
             $cookie = $this->settingsModelClass::get('cequens_whatsapp_cookie');
-            
+            $number = str_replace('+', '', $phone);
+
             $data = array(
-                "to" => $phone,
+                "to" => $number,
                 "type" => "template",
                 "template" => array(
                     "name" => "send_otp",
