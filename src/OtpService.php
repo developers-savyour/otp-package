@@ -35,6 +35,7 @@ class OtpService
      * you can inject sms service class names for callback if one service is failed
      */
     protected $availableSmsServices= [];
+    protected $sendFrom;
 
     public function __construct()
     {
@@ -46,6 +47,7 @@ class OtpService
         $this->optMessage = config('config-sms-and-email-package-service.otp.otp_message');
         $this->currentDate = date('Y-m-d');
         $this->OTPModel =  config('config-sms-and-email-package-service.OTPModelClass');
+        $this->sendFrom = config('config-sms-and-email-package-service.otp.default_send_type');
 //        $this->serviceBasePath = 'App/'.config('config-sms-and-email-package-service.wrapper_creation_path').'/Sms';
         $this->serviceBasePath = 'Savyour\SmsAndEmailPackage\ServicesWrappers';
         self::$SMS_SERVICE_ERROR_TYPES = config('config-sms-and-email-package-service.errors.service_wrapper_errors');
@@ -64,6 +66,28 @@ class OtpService
         }
 
         $this->availableSmsServices = $smsServices;
+        return $this;
+    }
+
+    public function setSendFrom(string $sendFrom)
+    {
+        if($this->debugMode)
+        {
+            Log::debug('Send from ' . $sendFrom);
+        }
+
+        $this->sendFrom = $sendFrom;
+        return $this;
+    }
+
+    public function setOtpMessage(string $msg)
+    {
+        if($this->debugMode)
+        {
+            Log::debug('Send msg '.$msg);
+        }
+
+        $this->optMessage = $msg;
         return $this;
     }
 
@@ -97,6 +121,7 @@ class OtpService
             ->where('mobile_number',$mobile_number)
             ->whereBetween('created_at',[$this->currentDate.' 00:00:00',$this->currentDate.' 23:59:59'])
             ->where('is_verified',0)
+            ->where('type', $this->sendFrom)
             ->latest()
             ->first();
         // checking user validation attempts
@@ -128,6 +153,7 @@ class OtpService
                 'validity' => $this->validity,
                 'sending_attempts' => 0,
                 'validation_attempts' => 0,
+                'type' => $this->sendFrom,
                 'is_verified'=> 0,
                 'is_expired'=> 0,
                 'generated_at' => date('Y-m-d H:i:s'),
@@ -265,7 +291,6 @@ class OtpService
 
         // create message
         $this->createMessage();
-
         foreach($this->availableSmsServices as $smsService)
         {
             $smsServicePath = $this->serviceBasePath.'\\'.$smsService;
