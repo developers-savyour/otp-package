@@ -138,6 +138,7 @@ return [
             'testing_mode' => env('CEQUENS_WHATSAPP_TESTING_MODE',false),
             'cookies' => env('CEQUENS_WHATSAPP_COOKIES',''),
             'token' => env('CEQUENS_WHATSAPP_TOKEN',''),
+            'template_name' => env('CEQUENS_WHATSAPP_TEMPLATE_NAME','savyour_otp_may')
         ],
     ]
 ];
