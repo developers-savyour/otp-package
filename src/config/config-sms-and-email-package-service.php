@@ -27,6 +27,7 @@ return [
         'max_attempts' => env('OTP_MAX_ATTEMPTS',3),
         'otp_message' =>  env('OTP_MESSAGE','Token is: {TOKEN}'),
         'otp_debug_mode' =>  env('OTP_DEBUG_MODE',true),
+        'default_send_type' =>  env('DEFAULT_OTP_SEND_TYPE','sms'),
     ],
 
     /*
@@ -131,6 +132,14 @@ return [
             'active_mode' => env('TWILIO_ACTIVE_MODE',false),
             'testing_mode' => env('TWILIO_TESTING_MODE',false),
         ],
+        'cequens_whatsapp' => [
+            'url' => env('CEQUENS_WHATSAPP_URL'),
+            'namespace' => env('CEQUENS_WHATSAPP_NAMESPACE'),
+            'active_mode' => env('CEQUENS_WHATSAPP_ACTIVE_MODE',false),
+            'testing_mode' => env('CEQUENS_WHATSAPP_TESTING_MODE',false),
+            'cookies' => env('CEQUENS_WHATSAPP_COOKIES',''),
+            'token' => env('CEQUENS_WHATSAPP_TOKEN',''),
+            'template_name' => env('CEQUENS_WHATSAPP_TEMPLATE_NAME','savyour_otp_may')
+        ],
     ]
 ];
-
