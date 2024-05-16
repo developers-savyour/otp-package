@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Savyour\SmsAndEmailPackage;
 
 
@@ -8,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class OtpService
 {
+    protected $test;
     protected $length;
     protected $onlyDigits;
     protected $validity;
