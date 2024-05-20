@@ -4,6 +4,7 @@ namespace Savyour\SmsAndEmailPackage;
 
 
 use Carbon\Carbon;
+use http\Message;
 use Illuminate\Support\Facades\Log;
 
 class OtpService
@@ -383,6 +384,48 @@ class OtpService
         }
 
         return $canBypass;
+
+    }
+
+    public function sendMessage($number,$message)
+    {   
+        if($this->debugMode)
+        {
+            Log::debug('sendMessage called ',['$number'=>$number,'$message'=>$message]);
+        }
+
+        $response = [
+            "status"=>false,
+            "message"=>"no service called",
+            'data'=> [
+                'is_limit_reached' => false,
+                "service_error_type"=>self::$SMS_SERVICE_ERROR_TYPES['NO_SERVICE_CALLED']
+            ]
+        ];
+
+        foreach($this->availableSmsServices as $smsService)
+        {
+            $smsServicePath = $this->serviceBasePath.'\\'.$smsService;
+            $smsServicePath2 = $smsService.'.php';
+            // checking file exist
+            $fileExists = file_exists($this->serviceBaseDir.'/ServicesWrappers/'.$smsServicePath2);
+            // skip if file dose not exist
+            if(!$fileExists)
+            {
+                continue;
+            }
+            $smsServiceClass = new  $smsServicePath();
+            $response = $smsServiceClass->send($number,$message);
+            // if message send then break
+            if($response['status'])
+            {
+                // setting sending sms service class name to response
+                $this->sendingSmsServiceName = str_replace("Service","",$smsService);
+                break;
+            }
+        }
+
+        return $response;
 
     }
 }
