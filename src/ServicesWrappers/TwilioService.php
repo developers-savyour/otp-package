@@ -24,6 +24,7 @@ class TwilioService
     public function setExtraData(array $data)
     {
         $this->extraData = $data;
+        return $this;
     }
 
     public function send($phone, $msg)
