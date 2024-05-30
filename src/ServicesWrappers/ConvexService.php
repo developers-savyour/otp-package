@@ -5,6 +5,7 @@ namespace Savyour\SmsAndEmailPackage\ServicesWrappers;
 class ConvexService
 {
     private $sender, $apikey, $apiSecret, $url, $debug,$activeMode;
+    private $extraData = [];
 
     public function __construct()
     {
@@ -16,6 +17,11 @@ class ConvexService
         $this->debug = constants('convex_sms_api.debug_mode');
         $this->activeMode = constants('convex_sms_api.active_mode');
 
+    }
+    public function setExtraData(array $data)
+    {
+        $this->extraData = $data;
+        return $this;
     }
 
     public function send($phone, $msg)

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class TwilioService
 {
     private $settings,$debug,$className;
+    private $extraData = [];
     public static $SERVICE_RESPONSE_CODE_LABELS = [];
     public static $OTP_SERVICE_ERROR = [];
 
@@ -18,6 +19,11 @@ class TwilioService
         $this->debug = config('config-sms-and-email-package-service.otp.otp_debug_mode');
         self::$OTP_SERVICE_ERROR = config('config-sms-and-email-package-service.errors.service_wrapper_errors');
         $this->className = __class__;
+    }
+
+    public function setExtraData(array $data)
+    {
+        $this->extraData = $data;
     }
 
     public function send($phone, $msg)

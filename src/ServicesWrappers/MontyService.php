@@ -6,6 +6,7 @@ namespace Savyour\SmsAndEmailPackage\ServicesWrappers;
 class MontyService
 {
     private $sender, $username, $apiID, $url, $debug,$activeMode;
+    private $extraData = [];
 
     public function __construct()
     {
@@ -19,6 +20,12 @@ class MontyService
 
     }
 
+    public function setExtraData(array $data)
+    {
+        $this->extraData = $data;
+        return $this;
+    }
+    
     public function send($phone, $msg)
     {
         // checking the sms service is enable

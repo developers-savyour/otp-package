@@ -8,6 +8,7 @@ use GuzzleHttp\Client as GuzzleClient;
 class CequensService
 {
     private $settings,$debug,$className;
+    private $extraData = [];
     public static $SERVICE_RESPONSE_CODE_LABELS = [];
     public static $OTP_SERVICE_ERROR = [];
 
@@ -19,6 +20,12 @@ class CequensService
         $this->className = __class__;
     }
 
+    public function setExtraData(array $data)
+    {
+        $this->extraData = $data;
+        return $this;
+    }
+    
     public function send($phone, $msg)
     {
 

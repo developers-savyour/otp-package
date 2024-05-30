@@ -24,6 +24,8 @@ class OtpService
     private $serviceBasePath;
     private $serviceBaseDir;
     private $debugMode;
+    private $extraData = [];
+
     private static $SMS_SERVICE_ERROR_TYPES =[];
     private static $OTP_SERVICE_ERROR = [];
     public static $SMS_SERVICE_ERROR_TYPES_BK =[
@@ -67,6 +69,18 @@ class OtpService
         }
 
         $this->availableSmsServices = $smsServices;
+        return $this;
+    }
+
+    public function setExtraData(array $data)
+    {
+        if($this->debugMode)
+        {
+            Log::debug('setExtraData for service ',$data);
+        }
+        
+        $this->extraData = $data;
+        
         return $this;
     }
 
@@ -415,7 +429,7 @@ class OtpService
                 continue;
             }
             $smsServiceClass = new  $smsServicePath();
-            $response = $smsServiceClass->send($number,$message);
+            $response = $smsServiceClass->setExtraData($this->extraData)->send($number,$message);
             // if message send then break
             if($response['status'])
             {

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 class M3TechService
 {
     private $settings,$debug,$className;
+    private $extraData = [];
     public static $OTP_SERVICE_ERROR = [];
     private static $SERVICE_RESPONSE_CODE_LABELS = [
         "0" => "Message Sent Successfully",
@@ -34,6 +35,12 @@ class M3TechService
 
     }
 
+    public function setExtraData(array $data)
+    {
+        $this->extraData = $data;
+        return $this;
+    }
+    
     public function send($phone, $msg)
     {
         // checking the sms service is enable

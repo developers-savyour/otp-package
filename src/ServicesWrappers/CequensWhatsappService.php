@@ -8,6 +8,7 @@ use GuzzleHttp\Client as GuzzleClient;
 class CequensWhatsappService
 {
     private $settings, $debug, $className, $settingsModelClass;
+    private $extraData = [];
     public static $SERVICE_RESPONSE_CODE_LABELS = [];
     public static $OTP_SERVICE_ERROR = [];
 
@@ -19,10 +20,18 @@ class CequensWhatsappService
         $this->debug = config('config-sms-and-email-package-service.otp.otp_debug_mode');
         self::$OTP_SERVICE_ERROR = config('config-sms-and-email-package-service.errors.service_wrapper_errors');
         $this->className = __class__;
+
     }
 
+    public function setExtraData(array $data)
+    {
+        $this->extraData = $data;
+        return $this;
+    }
+    
     public function send($phone, $msg)
     {
+        $templateName = (isset($this->extraData['template_name'])) ? $this->extraData['template_name'] : $this->settings['template_name'];
 
         // checking the sms service is enable
         if(!$this->settings['active_mode'])
@@ -40,8 +49,10 @@ class CequensWhatsappService
         try {
 
             $url = $this->settings['url'];
+
             $namespace = $this->settings['namespace'];
-            $templateName = $this->settings['template_name'];
+            $templateName = (isset($this->extraData['template_name'])) ? $this->extraData['template_name'] : $this->settings['template_name'];
+
             $token = $this->settingsModelClass::get('cequens_whatsapp_token');
             $cookie = $this->settingsModelClass::get('cequens_whatsapp_cookie');
             $number = str_replace('+', '', $phone);
@@ -120,7 +131,7 @@ class CequensWhatsappService
             ];
             // Log debug information if debug mode is enabled
             if ($this->debug) {
-                Log::info($this->className.' WHATSAPP API DEBUG: ', ['Response' => $response,'request'=>$data,'token'=> $token,"cookie" => $cookie]);
+                Log::info($this->className.' WHATSAPP API DEBUG: ', ['Response' => $response,'request'=>$data,'token'=> $token,"cookie" => $cookie,"extraData"=>$this->extraData]);
             }
 
             return $response;
