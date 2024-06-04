@@ -411,7 +411,7 @@ class OtpService
         $response = [
             "status"=>false,
             "message"=>"no service called",
-            'service_error_type'=>self::$SMS_SERVICE_ERROR_TYPES['NO_SERVICE_CALLED'],
+            "service_error_type" =>self::$SMS_SERVICE_ERROR_TYPES['NO_SERVICE_CALLED'],
             'data'=> [
                 'is_limit_reached' => false,
                 "service_error_type"=>self::$SMS_SERVICE_ERROR_TYPES['NO_SERVICE_CALLED']
