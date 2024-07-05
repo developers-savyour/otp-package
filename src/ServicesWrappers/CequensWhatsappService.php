@@ -23,12 +23,79 @@ class CequensWhatsappService
 
     }
 
+    private function createDynamicPayload($phone,$msg)
+    {
+        $payload = [];
+        $requestPayload = $this->extraData['payload']['CequensWhatsappService'];
+        $templateName = (isset($this->extraData['template_name'])) ? $this->extraData['template_name'] : $this->settings['template_name'];
+        $namespace = $this->settings['namespace'];
+
+        // creating dynamic payload
+        if(isset($this->extraData['dynamic_payload']) && $this->extraData['dynamic_payload'] && isset($this->extraData['payload']['CequensWhatsappService']))
+        {
+
+            $payload = [
+                "to" => $phone,
+                "recipient_type" => $requestPayload['recipient_type'],
+                "type" => $requestPayload['type'],
+                "template" => [
+                    "name" => $templateName,
+                    "namespace" => $namespace,
+                    "components" =>  $requestPayload['components'],
+                    "language" => $requestPayload['language'],
+                ],
+            ];
+        }
+        else // otp template
+        {
+            $namespace = $this->settings['namespace'];
+            $payload = array(
+                "to" => $phone,
+                "recipient_type" => "individual",
+                "type" => "template",
+                "template" => array(
+                    "name" => $templateName,
+                    "namespace" => $namespace,
+                    "components" => array(
+                        array(
+                            "type" => "body",
+                            "parameters" => array(
+                                array(
+                                    "type" => "text",
+                                    "text" => $msg
+                                )
+                            )
+                        ),
+                        array(
+                            "type" => "button",
+                            "sub_type" => "url",
+                            "index" => "0",
+                            "parameters" => array(
+                                array(
+                                    "type" => "text",
+                                    "text" => $msg
+                                )
+                            )
+                        )
+                    ),
+                    "language" => array(
+                        "policy" => "deterministic",
+                        "code" => "en"
+                    )
+                )
+            );
+        }
+
+        return $payload;
+
+    }
+
     public function setExtraData(array $data)
     {
         $this->extraData = $data;
         return $this;
     }
-    
+
     public function send($phone, $msg)
     {
         $templateName = (isset($this->extraData['template_name'])) ? $this->extraData['template_name'] : $this->settings['template_name'];
@@ -56,42 +123,8 @@ class CequensWhatsappService
             $token = $this->settingsModelClass::get('cequens_whatsapp_token');
             $cookie = $this->settingsModelClass::get('cequens_whatsapp_cookie');
             $number = str_replace('+', '', $phone);
+            $data = $this->createDynamicPayload($phone,$msg);
 
-            $data = array(
-                "to" => $number,
-                "recipient_type" => "individual",
-                "type" => "template",
-                "template" => array(
-                    "name" => $templateName,
-                    "namespace" => $namespace,
-                    "components" => array(
-                    array(
-                        "type" => "body",
-                        "parameters" => array(
-                        array(
-                            "type" => "text",
-                            "text" => $msg
-                        )
-                        )
-                    ),
-                    array(
-                        "type" => "button",
-                        "sub_type" => "url",
-                        "index" => "0",
-                        "parameters" => array(
-                        array(
-                            "type" => "text",
-                            "text" => $msg
-                        )
-                        )
-                    )
-                    ),
-                    "language" => array(
-                    "policy" => "deterministic",
-                    "code" => "en"
-                    )
-                )
-            );
 
             $curl = curl_init();
 
