@@ -26,14 +26,14 @@ class CequensWhatsappService
     private function createDynamicPayload($phone,$msg)
     {
         $payload = [];
-        $requestPayload = $this->extraData['payload']['CequensWhatsappService'];
+
         $templateName = (isset($this->extraData['template_name'])) ? $this->extraData['template_name'] : $this->settings['template_name'];
         $namespace = $this->settings['namespace'];
 
         // creating dynamic payload
         if(isset($this->extraData['dynamic_payload']) && $this->extraData['dynamic_payload'] && isset($this->extraData['payload']['CequensWhatsappService']))
         {
-
+            $requestPayload = $this->extraData['payload']['CequensWhatsappService'];
             $payload = [
                 "to" => $phone,
                 "recipient_type" => $requestPayload['recipient_type'],
